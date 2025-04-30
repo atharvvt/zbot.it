@@ -15,8 +15,19 @@ from app.bybit import bybit_bitget, bybit_coinbase, bybit_coinex, bybit_crypto, 
 from app.coinbase import coinbase_bitget, coinbase_bitmex, coinbase_coinex, coinbase_crypto, coinbase_htx, coinbase_kucoin
 from app.coinex import coinex_bitget, coinex_bitmex, coinex_crypto, coinex_htx, coinex_kucoin
 from app.kucoin import kucoin_bitget, kucoin_crypto, kucoin_htx
-
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Replace "*" with your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 class ArbitrageRequest(BaseModel):
     symbol: str
