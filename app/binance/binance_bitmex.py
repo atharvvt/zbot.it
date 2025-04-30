@@ -90,7 +90,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
 
     result = []
     # Arbitrage: Binance → Bitmex
-    if binance_ask and bitmex_bid and binance_ask < bitmex_bid:
+    if binance_ask and bitmex_bid:
         result.append(simulate_arbitrage(
             buy_price=binance_ask,
             sell_price=bitmex_bid,
@@ -102,7 +102,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
         )
         )
     # Arbitrage: Bitmex → Binance
-    if bitmex_ask and binance_bid and bitmex_ask < binance_bid:
+    if bitmex_ask and binance_bid:
         result.append(simulate_arbitrage(
             buy_price=bitmex_ask,
             sell_price=binance_bid,

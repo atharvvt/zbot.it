@@ -92,7 +92,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"Bitget  - Bid: {bitget_bid}, Ask: {bitget_ask}")
     result = []
     # Arbitrage: Bybit → Bitget
-    if bybit_ask and bitget_bid and bybit_ask < bitget_bid:
+    if bybit_ask and bitget_bid:
         result.append(simulate_arbitrage(
             buy_price=bybit_ask,
             sell_price=bitget_bid,
@@ -104,7 +104,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
         ))
 
     # Arbitrage: Bitget → Bybit
-    if bitget_ask and bybit_bid and bitget_ask < bybit_bid:
+    if bitget_ask and bybit_bid:
         result.append(simulate_arbitrage(
             buy_price=bitget_ask,
             sell_price=bybit_bid,

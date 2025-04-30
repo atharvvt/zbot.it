@@ -79,7 +79,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"HTX (Huobi) - Bid: {htx_bid}, Ask: {htx_ask}")
     result = []
     # Arbitrage: Coinbase → HTX
-    if coinbase_ask and htx_bid and coinbase_ask < htx_bid:
+    if coinbase_ask and htx_bid:
         result.append(simulate_arbitrage(
             buy_price=coinbase_ask,
             sell_price=htx_bid,
@@ -91,7 +91,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
         ))
 
     # Arbitrage: HTX → Coinbase
-    if htx_ask and coinbase_bid and htx_ask < coinbase_bid:
+    if htx_ask and coinbase_bid:
         result.append(simulate_arbitrage(
             buy_price=htx_ask,
             sell_price=coinbase_bid,

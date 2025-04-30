@@ -382,6 +382,45 @@
             -webkit-appearance: none;
             margin: 0;
         }
+
+               /* Modified CSS - only showing modified styles */
+               .card-title svg {
+            color: var(--accent-blue);
+        }
+
+        /* Removing the buttons styling since they're not needed */
+        #stopBtn {
+            display: none;
+        }
+
+        /* Status indicator for showing bot status */
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 15px;
+            gap: 8px;
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+        }
+        
+        .status-indicator.running {
+            background-color: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+        }
+        
+        .status-indicator.stopped {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--accent-red);
+        }
+
+        /* Hide the form elements we don't need */
+        .checkbox-group, .btn-primary {
+            display: none;
+        }
     </style>
 </head>
 
@@ -466,20 +505,6 @@
                     <input type="number" id="amount" value="50000">
                 </div>
 
-                <div class="checkbox-group">
-                    <input type="checkbox" id="autoRun">
-                    <label for="autoRun">Auto-Run Every 10 Seconds</label>
-                </div>
-
-                <button type="submit" class="btn btn-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                        <polyline points="16 7 22 7 22 13"></polyline>
-                    </svg>
-                    Run Arbitrage
-                </button>
-
                 <button type="button" id="stopBtn" class="btn btn-danger">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -488,6 +513,14 @@
                     </svg>
                     Stop Bot
                 </button>
+
+                <div id="botStatus" class="status-indicator running">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                    </svg>
+                    Bot running every 10 seconds
+                </div>
             </form>
         </div>
 
@@ -530,7 +563,7 @@
                             <line x1="12" y1="8" x2="12" y2="12"></line>
                             <line x1="12" y1="16" x2="12.01" y2="16"></line>
                         </svg>
-                        <p>No data available. Run arbitrage analysis to see results.</p>
+                        <p>Initializing arbitrage analysis...</p>
                     </div>
                     <div id="result"></div>
                 </div>
@@ -544,9 +577,14 @@
         const resultContainer = document.getElementById("result");
         const noDataMessage = document.getElementById("noDataMessage");
         const lastUpdated = document.getElementById("last-updated");
+        const botStatus = document.getElementById("botStatus");
         let profitHistory = [];
+        let isRunning = true;
 
+        // Function to run arbitrage analysis
         async function runArbitrage() {
+            if (!isRunning) return;
+
             const pair = document.getElementById("pair").value;
             const symbol = document.getElementById("symbol").value;
             const trade_amount_usd = parseFloat(document.getElementById("amount").value);
@@ -578,14 +616,14 @@
                 }
             } catch (err) {
                 resultContainer.innerHTML = `
-              <div class="error-message" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M12 8v4M12 16h.01"></path>
-                  <path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z"></path>
-                </svg>
-                <p>Error: ${err.message}</p>
-              </div>
-            `;
+                  <div class="error-message" style="background: rgba(239, 68, 68, 0.15); color: var(--accent-red); padding: 15px; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M12 8v4M12 16h.01"></path>
+                      <path d="M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18Z"></path>
+                    </svg>
+                    <p>Error: ${err.message}</p>
+                  </div>
+                `;
                 noDataMessage.style.display = "none";
             }
 
@@ -596,15 +634,15 @@
             if (!data.result || data.result.length === 0) {
                 noDataMessage.style.display = "flex";
                 resultContainer.innerHTML = `
-              <div style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 10px; display: block;">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="8" x2="12" y2="12"></line>
-                  <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                </svg>
-                <p>No data available. Please check your connection or try different parameters.</p>
-              </div>
-            `;
+                  <div style="background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); padding: 15px; border-radius: 8px; margin-bottom: 15px; text-align: center;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 10px; display: block;">
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>No data available. Please check your connection or try different parameters.</p>
+                  </div>
+                `;
                 return;
             }
 
@@ -617,25 +655,25 @@
             // Add status message based on results
             if (profitableOpportunities.length > 0) {
                 resultContainer.innerHTML = `
-              <div style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                  <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-                <p><strong>Arbitrage opportunities found!</strong> ${profitableOpportunities.length} profitable trades available.</p>
-              </div>
-            `;
+                  <div style="background: rgba(16, 185, 129, 0.15); color: var(--accent-green); padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                    </svg>
+                    <p><strong>Arbitrage opportunities found!</strong> ${profitableOpportunities.length} profitable trades available.</p>
+                  </div>
+                `;
             } else {
                 resultContainer.innerHTML = `
-              <div style="background: rgba(234, 179, 8, 0.15); color: var(--accent-yellow); padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
-                  <line x1="12" y1="9" x2="12" y2="13"></line>
-                  <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                </svg>
-                <p><strong>No arbitrage opportunities found.</strong> potential trade would result in losses with current market conditions.</p>
-              </div>
-            `;
+                  <div style="background: rgba(234, 179, 8, 0.15); color: var(--accent-yellow); padding: 15px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                      <line x1="12" y1="9" x2="12" y2="13"></line>
+                      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <p><strong>No arbitrage opportunities found.</strong> potential trade would result in losses with current market conditions.</p>
+                  </div>
+                `;
             }
 
             // Add each result card
@@ -647,88 +685,88 @@
                     '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"></path><path d="m12 5-7 7 7 7"></path></svg>';
 
                 resultContainer.innerHTML += `
-              <div class="result-card">
-                <div class="result-card-header">
-                  <div class="exchange-path">
-                    <span class="exchange-indicator exchange-from">${item.from_exchange}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                      <path d="M5 12h14"></path>
-                      <path d="m12 5 7 7-7 7"></path>
-                    </svg>
-                    <span class="exchange-indicator exchange-to">${item.to_exchange}</span>
+                  <div class="result-card">
+                    <div class="result-card-header">
+                      <div class="exchange-path">
+                        <span class="exchange-indicator exchange-from">${item.from_exchange}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M5 12h14"></path>
+                          <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                        <span class="exchange-indicator exchange-to">${item.to_exchange}</span>
+                      </div>
+                      <div class="profit-indicator ${profitClass}">
+                        ${profitIcon}
+                        ${isProfitable ? 'Profit' : 'Loss'}: ${item.profit.toFixed(2)}
+                      </div>
+                    </div>
+                    <div class="result-card-body">
+                      <div class="result-card-section">
+                        <div class="data-row">
+                          <div class="data-label">Buy Price</div>
+                          <div class="data-value">${item.buy_price.toFixed(2)}</div>
+                        </div>
+                        <div class="data-row">
+                          <div class="data-label">Sell Price</div>
+                          <div class="data-value">${item.sell_price.toFixed(2)}</div>
+                        </div>
+                        <div class="data-row">
+                          <div class="data-label">Currency Bought</div>
+                          <div class="data-value">${item.currency_bought.toFixed(6)}</div>
+                        </div>
+                        <div class="data-row">
+                          <div class="data-label">After Network Fee</div>
+                          <div class="data-value">${item.currency_after_network_fee.toFixed(6)}</div>
+                        </div>
+                      </div>
+                      <div class="result-card-section">
+                        <div class="data-row">
+                          <div class="data-label">USD Gained</div>
+                          <div class="data-value">${item.usd_gained.toFixed(2)}</div>
+                        </div>
+                        <div class="data-row">
+                          <div class="data-label">Buy Fee <span class="badge badge-yellow">${item.buy_fee_usd}</span></div>
+                          <div class="data-value">${item.buy_fee_usd.toFixed(2)}</div>
+                        </div>
+                        <div class="data-row">
+                          <div class="data-label">Sell Fee <span class="badge badge-yellow">${item.sell_fee_usd}</span></div>
+                          <div class="data-value">${item.sell_fee_usd.toFixed(2)}</div>
+                        </div>
+                        <div class="data-row">
+                          <div class="data-label">Tax</div>
+                          <div class="data-value">${item.tax.toFixed(2)}</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div class="profit-indicator ${profitClass}">
-                    ${profitIcon}
-                    ${isProfitable ? 'Profit' : 'Loss'}: $${item.profit.toFixed(2)}
-                  </div>
-                </div>
-                <div class="result-card-body">
-                  <div class="result-card-section">
-                    <div class="data-row">
-                      <div class="data-label">Buy Price</div>
-                      <div class="data-value">$${item.buy_price.toFixed(2)}</div>
-                    </div>
-                    <div class="data-row">
-                      <div class="data-label">Sell Price</div>
-                      <div class="data-value">$${item.sell_price.toFixed(2)}</div>
-                    </div>
-                    <div class="data-row">
-                      <div class="data-label">Currency Bought</div>
-                      <div class="data-value">${item.currency_bought.toFixed(6)}</div>
-                    </div>
-                    <div class="data-row">
-                      <div class="data-label">After Network Fee</div>
-                      <div class="data-value">${item.currency_after_network_fee.toFixed(6)}</div>
-                    </div>
-                  </div>
-                  <div class="result-card-section">
-                    <div class="data-row">
-                      <div class="data-label">USD Gained</div>
-                      <div class="data-value">$${item.usd_gained.toFixed(2)}</div>
-                    </div>
-                    <div class="data-row">
-                      <div class="data-label">Buy Fee <span class="badge badge-yellow">$${item.buy_fee_usd}</span></div>
-                      <div class="data-value">$${item.buy_fee_usd.toFixed(2)}</div>
-                    </div>
-                    <div class="data-row">
-                      <div class="data-label">Sell Fee <span class="badge badge-yellow">$${item.sell_fee_usd}</span></div>
-                      <div class="data-value">$${item.sell_fee_usd.toFixed(2)}</div>
-                    </div>
-                    <div class="data-row">
-                      <div class="data-label">Tax</div>
-                      <div class="data-value">$${item.tax.toFixed(2)}</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            `;
+                `;
             });
 
             // Add profit history if available
             if (profitHistory.length > 0) {
                 let historyHtml = `
-              <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
-                <h3 style="color: var(--text-primary); font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
-                  </svg>
-                  Profit History
-                </h3>
-                <div style="max-height: 200px; overflow-y: auto; padding: 10px; background: var(--bg-input); border-radius: 8px;">
-            `;
+                  <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border-color);">
+                    <h3 style="color: var(--text-primary); font-size: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"></path>
+                      </svg>
+                      Profit History
+                    </h3>
+                    <div style="max-height: 200px; overflow-y: auto; padding: 10px; background: var(--bg-input); border-radius: 8px;">
+                `;
 
                 // List last 5 profits
                 const recentProfits = profitHistory.slice(-5).reverse();
                 recentProfits.forEach(profit => {
                     historyHtml += `
-                <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="badge badge-green">+$${profit.profit}</span>
-                    <span>${profit.fromExchange} → ${profit.toExchange}</span>
-                  </div>
-                  <div style="color: var(--text-secondary); font-size: 14px;">${profit.timestamp}</div>
-                </div>
-              `;
+                    <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05);">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span class="badge badge-green">+${profit.profit}</span>
+                        <span>${profit.fromExchange} → ${profit.toExchange}</span>
+                      </div>
+                      <div style="color: var(--text-secondary); font-size: 14px;">${profit.timestamp}</div>
+                    </div>
+                  `;
                 });
 
                 historyHtml += `</div></div>`;
@@ -741,48 +779,68 @@
             lastUpdated.textContent = `Last updated: ${now.toLocaleTimeString()}`;
         }
 
-        document.getElementById("arbForm").addEventListener("submit", function (e) {
-            e.preventDefault();
-            runArbitrage();
-        });
-
-        document.getElementById("autoRun").addEventListener("change", function () {
-            if (this.checked) {
-                runArbitrage();
-                intervalId = setInterval(runArbitrage, 10000);
-            } else {
+        // Function to start the automatic arbitrage process
+        function startAutomaticArbitrage() {
+            if (intervalId) {
                 clearInterval(intervalId);
-                intervalId = null;
             }
-        });
+            
+            // Run immediately
+            runArbitrage();
+            
+            // Then set interval to run every 10 seconds
+            intervalId = setInterval(runArbitrage, 10000);
+            isRunning = true;
+            
+            // Update status indicator
+            botStatus.classList.remove('stopped');
+            botStatus.classList.add('running');
+            botStatus.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+                </svg>
+                Bot running every 10 seconds
+            `;
+        }
 
-        document.getElementById("stopBtn").addEventListener("click", function () {
+        // Function to stop the automatic arbitrage process
+        function stopAutomaticArbitrage() {
             clearInterval(intervalId);
             intervalId = null;
-            document.getElementById("autoRun").checked = false;
+            isRunning = false;
+            
+            // Update status indicator
+            botStatus.classList.remove('running');
+            botStatus.classList.add('stopped');
+            botStatus.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <rect x="9" y="9" width="6" height="6"></rect>
+                </svg>
+                Bot stopped at ${new Date().toLocaleTimeString()}
+            `;
+        }
 
-            const stopMessage = document.createElement('div');
-            stopMessage.classList.add('badge', 'badge-red');
-            stopMessage.style.marginTop = '10px';
-            stopMessage.style.padding = '8px 12px';
-            stopMessage.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="12" cy="12" r="10"></circle>
-              <rect x="9" y="9" width="6" height="6"></rect>
-            </svg>
-            Bot stopped at ${new Date().toLocaleTimeString()}
-          `;
-
-            resultContainer.appendChild(stopMessage);
+        // Event handlers
+        document.getElementById("pair").addEventListener("change", function() {
+            // When exchange pair changes, restart the arbitrage process
+            startAutomaticArbitrage();
         });
 
-        document.getElementById("refresh-btn").addEventListener("click", function () {
-            if (!intervalId) {
+        document.getElementById("stopBtn").addEventListener("click", function() {
+            stopAutomaticArbitrage();
+        });
+
+        document.getElementById("refresh-btn").addEventListener("click", function() {
+            if (!isRunning) {
+                // If bot is stopped, just run once
                 runArbitrage();
             }
         });
 
-        document.getElementById("export-btn").addEventListener("click", function () {
+        document.getElementById("export-btn").addEventListener("click", function() {
             // Create CSV content from profit history
             if (profitHistory.length === 0) {
                 alert("No profit history to export!");
@@ -793,7 +851,7 @@
             csvContent += "Timestamp,From Exchange,To Exchange,Symbol,Profit\n";
 
             profitHistory.forEach(profit => {
-                csvContent += `${profit.timestamp},${profit.fromExchange},${profit.toExchange},${profit.symbol},$${profit.profit}\n`;
+                csvContent += `${profit.timestamp},${profit.fromExchange},${profit.toExchange},${profit.symbol},${profit.profit}\n`;
             });
 
             // Create download link
@@ -806,6 +864,11 @@
             // Download the CSV file
             link.click();
             document.body.removeChild(link);
+        });
+
+        // Start automatic arbitrage as soon as the page loads
+        window.addEventListener("load", function() {
+            startAutomaticArbitrage();
         });
     </script>
 </body>

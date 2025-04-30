@@ -80,7 +80,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
 
     result = []
     # Arbitrage: Coinbase → Crypto.com
-    if coinbase_ask and cryptocom_bid and coinbase_ask < cryptocom_bid:
+    if coinbase_ask and cryptocom_bid:
         result.append(simulate_arbitrage(
             buy_price=coinbase_ask,
             sell_price=cryptocom_bid,
@@ -92,7 +92,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
         ))
 
     # Arbitrage: Crypto.com → Coinbase
-    if cryptocom_ask and coinbase_bid and cryptocom_ask < coinbase_bid:
+    if cryptocom_ask and coinbase_bid:
         result.append(simulate_arbitrage(
             buy_price=cryptocom_ask,
             sell_price=coinbase_bid,

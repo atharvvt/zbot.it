@@ -98,7 +98,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"KuCoin      - Bid: {kucoin_bid}, Ask: {kucoin_ask}")
     print(f"HTX (Huobi) - Bid: {htx_bid}, Ask: {htx_ask}")
     result = []
-    if kucoin_ask and htx_bid and kucoin_ask < htx_bid:
+    if kucoin_ask and htx_bid:
         result.append(simulate_arbitrage(
             buy_price=kucoin_ask,
             sell_price=htx_bid,
@@ -109,7 +109,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
             to_exchange="HTX"
         ))
 
-    if htx_ask and kucoin_bid and htx_ask < kucoin_bid:
+    if htx_ask and kucoin_bid:
         result.append(simulate_arbitrage(
             buy_price=htx_ask,
             sell_price=kucoin_bid,

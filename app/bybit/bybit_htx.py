@@ -93,7 +93,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"HTX    - Bid: {htx_bid}, Ask: {htx_ask}")
     result = []
     # Arbitrage: Bybit → HTX
-    if bybit_ask and htx_bid and bybit_ask < htx_bid:
+    if bybit_ask and htx_bid:
        result.append(simulate_arbitrage(
             buy_price=bybit_ask,
             sell_price=htx_bid,
@@ -105,7 +105,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
         ))
 
     # Arbitrage: HTX → Bybit
-    if htx_ask and bybit_bid and htx_ask < bybit_bid:
+    if htx_ask and bybit_bid:
         result.append(simulate_arbitrage(
             buy_price=htx_ask,
             sell_price=bybit_bid,

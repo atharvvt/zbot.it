@@ -97,7 +97,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"Bitget        - Bid: {bitget_bid}, Ask: {bitget_ask}")
     print(f"HTX (Huobi)   - Bid: {htx_bid}, Ask: {htx_ask}")
     result = []
-    if bitget_ask and htx_bid and bitget_ask < htx_bid:
+    if bitget_ask and htx_bid:
         result.append(simulate_arbitrage(
             buy_price=bitget_ask,
             sell_price=htx_bid,
@@ -108,7 +108,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
             to_exchange="HTX (Huobi)"
         ))
 
-    if htx_ask and bitget_bid and htx_ask < bitget_bid:
+    if htx_ask and bitget_bid:
         result.append(simulate_arbitrage(
             buy_price=htx_ask,
             sell_price=bitget_bid,

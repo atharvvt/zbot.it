@@ -92,7 +92,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"CoinEx - Bid: {coinex_bid}, Ask: {coinex_ask}")
     print(f"HTX    - Bid: {htx_bid}, Ask: {htx_ask}")
     result = []
-    if coinex_ask and htx_bid and coinex_ask < htx_bid:
+    if coinex_ask and htx_bid:
         result.append(simulate_arbitrage(
             buy_price=coinex_ask,
             sell_price=htx_bid,
@@ -103,7 +103,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
             to_exchange="HTX"
         ))
 
-    if htx_ask and coinex_bid and htx_ask < coinex_bid:
+    if htx_ask and coinex_bid:
         result.append(simulate_arbitrage(
             buy_price=htx_ask,
             sell_price=coinex_bid,

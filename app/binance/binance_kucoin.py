@@ -101,7 +101,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"Binance - Bid: {binance_bid}, Ask: {binance_ask}")
     print(f"KuCoin  - Bid: {kucoin_bid}, Ask: {kucoin_ask}")
     result = []
-    if binance_ask and kucoin_bid and binance_ask < kucoin_bid:
+    if binance_ask and kucoin_bid:
         result.append(simulate_arbitrage(
             buy_price=binance_ask,
             sell_price=kucoin_bid,
@@ -112,7 +112,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
             to_exchange="KuCoin"
         ))
 
-    if kucoin_ask and binance_bid and kucoin_ask < binance_bid:
+    if kucoin_ask and binance_bid:
         result.append(simulate_arbitrage(
             buy_price=kucoin_ask,
             sell_price=binance_bid,

@@ -98,7 +98,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     print(f"Coinbase - Bid: {coinbase_bid}, Ask: {coinbase_ask}")
     result = []
     # Binance → Coinbase
-    if binance_ask and coinbase_bid and binance_ask < coinbase_bid:
+    if binance_ask and coinbase_bid:
         result.append(simulate_arbitrage(
             buy_price=binance_ask,
             sell_price=coinbase_bid,
@@ -110,7 +110,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
         ))
 
     # Coinbase → Binance
-    elif coinbase_ask and binance_bid and coinbase_ask < binance_bid:
+    elif coinbase_ask and binance_bid:
         result.append(simulate_arbitrage(
             buy_price=coinbase_ask,
             sell_price=binance_bid,
