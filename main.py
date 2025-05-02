@@ -35,6 +35,9 @@ class ArbitrageRequest(BaseModel):
 
 templates = Jinja2Templates(directory="templates")
 
+@app.head("/", include_in_schema=False)
+def healthcheck():
+    return Response(status_code=200)
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
