@@ -36,15 +36,6 @@ class ArbitrageRequest(BaseModel):
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get("/health", include_in_schema=False)
-def health_check():
-    return JSONResponse(status_code=200, content={"status": "ok"})
-
-@app.head("/", include_in_schema=False)
-def head_home():
-    return Response(status_code=200)
-
-
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
