@@ -75,12 +75,12 @@ def simulate_arbitrage(buy_price, sell_price, buy_fee, sell_fee, trade_amount_us
         "profit": round(profit, 2)
     }
 
-    print(f"\n🧮 {from_exchange} → {to_exchange}")
-    print(f"Buy @ ${buy_price:.2f}, Sell @ ${sell_price:.2f}")
-    print(f"currency Bought: {btc_bought:.6f}, After Network Fee: {btc_to_sell:.6f}")
-    print(f"USD Gained: ${usd_gained:.2f}")
-    print(f"Fees: Buy=${buy_fee_usd:.2f}, Sell=${sell_fee_usd:.2f}, Tax=${tax:.2f}")
-    print(f"💰 Profit: ${profit:.2f}")
+    # print(f"\n🧮 {from_exchange} → {to_exchange}")
+    # print(f"Buy @ ${buy_price:.2f}, Sell @ ${sell_price:.2f}")
+    # print(f"currency Bought: {btc_bought:.6f}, After Network Fee: {btc_to_sell:.6f}")
+    # print(f"USD Gained: ${usd_gained:.2f}")
+    # print(f"Fees: Buy=${buy_fee_usd:.2f}, Sell=${sell_fee_usd:.2f}, Tax=${tax:.2f}")
+    # print(f"💰 Profit: ${profit:.2f}")
 
     return data
 
@@ -88,9 +88,9 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     coinex_bid, coinex_ask = get_coinex_price(symbol)
     cryptocom_bid, cryptocom_ask = get_cryptocom_price(symbol)
 
-    print(f"\n🔍 Prices:")
-    print(f"CoinEx     - Bid: {coinex_bid}, Ask: {coinex_ask}")
-    print(f"Crypto.com - Bid: {cryptocom_bid}, Ask: {cryptocom_ask}")
+    # print(f"\n🔍 Prices:")
+    # print(f"CoinEx     - Bid: {coinex_bid}, Ask: {coinex_ask}")
+    # print(f"Crypto.com - Bid: {cryptocom_bid}, Ask: {cryptocom_ask}")
     result = []
     if coinex_ask and cryptocom_bid:
         result.append(simulate_arbitrage(
@@ -123,7 +123,4 @@ def run_arbitrage(symbol='BTC/USDT', trade_amount_usd=50000):
 
 
 # Optional CLI running
-if __name__ == "__main__":
-    while True:
-        check_arbitrage_opportunity("BTC/USDT")
-        time.sleep(10)
+

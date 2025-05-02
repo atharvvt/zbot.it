@@ -79,12 +79,12 @@ def simulate_arbitrage(buy_price, sell_price, buy_fee, sell_fee, trade_amount_us
         "profit": round(profit, 2)
     }
 
-    print(f"\n🧮 {from_exchange} → {to_exchange}")
-    print(f"Buy @ ${buy_price:.2f}, Sell @ ${sell_price:.2f}")
-    print(f"currency Bought: {btc_bought:.6f}, After Network Fee: {btc_to_sell:.6f}")
-    print(f"USD Gained: ${usd_gained:.2f}")
-    print(f"Fees: Buy=${buy_fee_usd:.2f}, Sell=${sell_fee_usd:.2f}, Tax=${tax:.2f}")
-    print(f"💰 Profit: ${profit:.2f}")
+    # print(f"\n🧮 {from_exchange} → {to_exchange}")
+    # print(f"Buy @ ${buy_price:.2f}, Sell @ ${sell_price:.2f}")
+    # print(f"currency Bought: {btc_bought:.6f}, After Network Fee: {btc_to_sell:.6f}")
+    # print(f"USD Gained: ${usd_gained:.2f}")
+    # print(f"Fees: Buy=${buy_fee_usd:.2f}, Sell=${sell_fee_usd:.2f}, Tax=${tax:.2f}")
+    # print(f"💰 Profit: ${profit:.2f}")
 
     return data
 
@@ -93,9 +93,9 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     binance_bid, binance_ask = get_binance_price(symbol)
     coinbase_bid, coinbase_ask = get_coinbase_price(symbol)
 
-    print(f"\n🔍 Prices:")
-    print(f"Binance  - Bid: {binance_bid}, Ask: {binance_ask}")
-    print(f"Coinbase - Bid: {coinbase_bid}, Ask: {coinbase_ask}")
+    # print(f"\n🔍 Prices:")
+    # print(f"Binance  - Bid: {binance_bid}, Ask: {binance_ask}")
+    # print(f"Coinbase - Bid: {coinbase_bid}, Ask: {coinbase_ask}")
     result = []
     # Binance → Coinbase
     if binance_ask and coinbase_bid:
@@ -133,7 +133,4 @@ def run_arbitrage(symbol='BTC/USDT', trade_amount_usd=50000):
 
 
 # Optional CLI running
-if __name__ == "__main__":
-    while True:
-        check_arbitrage_opportunity("BTC/USDT")
-        time.sleep(10)
+

@@ -80,12 +80,12 @@ def simulate_arbitrage(buy_price, sell_price, buy_fee, sell_fee, trade_amount_us
         "profit": round(profit, 2)
     }
 
-    print(f"\n🧮 {from_exchange} → {to_exchange}")
-    print(f"Buy @ ${buy_price:.2f}, Sell @ ${sell_price:.2f}")
-    print(f"currency Bought: {btc_bought:.6f}, After Network Fee: {btc_to_sell:.6f}")
-    print(f"USD Gained: ${usd_gained:.2f}")
-    print(f"Fees: Buy=${buy_fee_usd:.2f}, Sell=${sell_fee_usd:.2f}, Tax=${tax:.2f}")
-    print(f"💰 Profit: ${profit:.2f}")
+    # print(f"\n🧮 {from_exchange} → {to_exchange}")
+    # print(f"Buy @ ${buy_price:.2f}, Sell @ ${sell_price:.2f}")
+    # print(f"currency Bought: {btc_bought:.6f}, After Network Fee: {btc_to_sell:.6f}")
+    # print(f"USD Gained: ${usd_gained:.2f}")
+    # print(f"Fees: Buy=${buy_fee_usd:.2f}, Sell=${sell_fee_usd:.2f}, Tax=${tax:.2f}")
+    # print(f"💰 Profit: ${profit:.2f}")
 
     return data
 
@@ -94,9 +94,9 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
     kucoin_bid, kucoin_ask = get_kucoin_price(symbol)
     htx_bid, htx_ask = get_htx_price(symbol)
 
-    print(f"\n🔍 Prices:")
-    print(f"KuCoin      - Bid: {kucoin_bid}, Ask: {kucoin_ask}")
-    print(f"HTX (Huobi) - Bid: {htx_bid}, Ask: {htx_ask}")
+    # print(f"\n🔍 Prices:")
+    # print(f"KuCoin      - Bid: {kucoin_bid}, Ask: {kucoin_ask}")
+    # print(f"HTX (Huobi) - Bid: {htx_bid}, Ask: {htx_ask}")
     result = []
     if kucoin_ask and htx_bid:
         result.append(simulate_arbitrage(
@@ -129,7 +129,7 @@ def run_arbitrage(symbol='BTC/USDT', trade_amount_usd=50000):
 
 
 # Optional CLI running
-if __name__ == "__main__":
-    while True:
-        check_arbitrage_opportunity("BTC/USDT")
-        time.sleep(10)
+# if __name__ == "__main__":
+#     while True:
+#         check_arbitrage_opportunity("BTC/USDT")
+#         time.sleep(25)
