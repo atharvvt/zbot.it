@@ -65,6 +65,7 @@
             margin-top: 0;
         }
 
+        /* Fixed controls styling to prevent overlap */
         .controls {
             background: var(--bg-card);
             border-radius: 12px;
@@ -72,13 +73,14 @@
             margin-bottom: 30px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
-            display: flex;
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
             gap: 20px;
             align-items: flex-end;
         }
 
         .form-group {
-            flex: 1;
+            width: 100%;
         }
 
         label {
@@ -98,6 +100,7 @@
             color: var(--text-primary);
             font-size: 15px;
             transition: all 0.2s ease;
+            box-sizing: border-box;
         }
 
         input:focus,
@@ -121,15 +124,18 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            height: 48px;
         }
 
         button:hover {
             background-color: #2563eb;
         }
 
+        /* Updated stats to show three columns */
         .stats {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
             margin-bottom: 20px;
         }
 
@@ -137,15 +143,9 @@
             background: var(--bg-card);
             border-radius: 12px;
             padding: 20px;
-            flex: 1;
-            margin-right: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
             text-align: center;
-        }
-
-        .stat-card:last-child {
-            margin-right: 0;
         }
 
         .stat-value {
@@ -186,8 +186,6 @@
             color: var(--text-secondary);
             font-size: 0.9rem;
         }
-
-        /* Additional styles to enhance the arbitrage dashboard */
 
         /* Responsive grid adjustments */
         .opportunities-grid {
@@ -301,18 +299,12 @@
         /* Mobile responsiveness improvements */
         @media (max-width: 768px) {
             .controls {
-                flex-direction: column;
+                grid-template-columns: 1fr;
                 gap: 15px;
             }
 
             .stats {
-                flex-wrap: wrap;
-            }
-
-            .stat-card {
-                flex: 1 1 45%;
-                margin-right: 0;
-                margin-bottom: 15px;
+                grid-template-columns: 1fr;
             }
 
             .opportunities-grid {
@@ -374,27 +366,6 @@
             border-top: 1px solid var(--border-color);
         }
 
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--accent-blue);
-            animation: spin 1s ease-in-out infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
         /* Remove spinner arrows for number input */
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button {
@@ -413,11 +384,54 @@
             gap: 10px;
         }
 
-        .no-opportunities {
+        .no-opportunities,
+        .no-history {
             text-align: center;
             padding: 40px;
             background: var(--bg-card);
             border-radius: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* New section styling for profitable opportunities history */
+        .profitable-section {
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .timestamp {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Pagination controls */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .page-button {
+            padding: 8px 16px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .page-button:hover {
+            background-color: var(--accent-blue);
+        }
+
+        .page-info {
             color: var(--text-secondary);
         }
     </style>
@@ -461,21 +475,17 @@
                 <div class="stat-value" id="active-pairs">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Profitable Opportunities</div>
-                <div class="stat-value positive" id="profitable-ops">0</div>
+                <div class="stat-label">Total Profit Potential</div>
+                <div class="stat-value positive" id="total-profit">$0.00</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">Max Profit Potential</div>
-                <div class="stat-value positive" id="max-profit">$0.00</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Update Frequency</div>
-                <div class="stat-value" id="update-frequency">30s</div>
+                <div class="stat-label">Historical Profits</div>
+                <div class="stat-value positive" id="historical-profit">$0.00</div>
             </div>
         </div>
 
         <div class="opportunities-header">
-            <h2 class="opportunities-title">Opportunities</h2>
+            <h2 class="opportunities-title">Current Opportunities</h2>
             <div class="last-updated" id="last-updated">(Last updated: calculating...)</div>
         </div>
 
@@ -483,6 +493,15 @@
             <div class="loading">
                 <div class="spinner"></div>
                 <p>Analyzing all exchange pairs...</p>
+            </div>
+        </div>
+
+        <!-- New section for storing profitable opportunities -->
+        <div class="profitable-section">
+            <h2 class="opportunities-title">Profitable Opportunities History</h2>
+            <div id="profitable-history" class="opportunities-grid">
+                <!-- Profitable opportunities will be added here -->
+                <div class="no-history">No profitable opportunities found yet</div>
             </div>
         </div>
     </div>
@@ -502,8 +521,19 @@
         // API base URL - change this to your FastAPI server URL
         const API_BASE_URL = 'http://localhost:8000';
 
+        // Pagination settings - for current opportunities
+        const itemsPerPage = 12; // Show more items per page
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // Pagination settings - for history
+        const historyItemsPerPage = 12;
+        let historyCurrentPage = 1;
+        let historyTotalPages = 1;
+
         let timer;
         let opportunities = [];
+        let profitableHistory = [];
 
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
@@ -556,7 +586,8 @@
                         tax: direction.tax,
                         difference: direction.sell_price - direction.buy_price,
                         fees: direction.buy_fee_usd + direction.sell_fee_usd,
-                        pair_id: `${fromExchange}-${toExchange}`
+                        pair_id: `${fromExchange}-${toExchange}`,
+                        timestamp: new Date().toISOString()
                     };
                 });
             } catch (error) {
@@ -577,7 +608,7 @@
             document.getElementById('opportunities-container').innerHTML = `
         <div class="loading" id="loading-spinner">
             <div class="spinner"></div>
-            <p>Analyzing ${allTradingPairs.length} exchange pairs for ${symbol}...</p>
+            <p>Analyzing ${allTradingPairs.length * 2} exchange pairs for ${symbol}...</p>
         </div>
     `;
 
@@ -592,8 +623,13 @@
                     .flat()
                     .sort((a, b) => b.profit - a.profit);
 
+                // Reset to first page when new data is loaded
+                currentPage = 1;
+                totalPages = Math.ceil(opportunities.length / itemsPerPage);
+
                 renderOpportunities();
                 updateStats();
+                updateProfitableHistory();
 
                 // Update timestamp
                 const now = new Date();
@@ -653,14 +689,43 @@
                 </svg>
                 <p><strong>Arbitrage opportunities found!</strong> ${profitableOps.length} profitable trades available.</p>
             </div>
+            <div class="pagination-controls" id="opportunity-pagination">
+                <button class="page-button" id="prev-page">Previous</button>
+                <span class="page-info">Page <span id="current-page">1</span> of <span id="total-pages">${Math.ceil(profitableOps.length / itemsPerPage)}</span></span>
+                <button class="page-button" id="next-page">Next</button>
+            </div>
             <div class="opportunities-grid" id="opportunities-grid"></div>
         `;
 
                 const grid = document.getElementById('opportunities-grid');
 
-                // Add each profitable opportunity
-                profitableOps.forEach(op => {
+                // Calculate which items to show on current page
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, profitableOps.length);
+                const paginatedItems = profitableOps.slice(startIndex, endIndex);
+
+                // Add each profitable opportunity for current page
+                paginatedItems.forEach(op => {
                     grid.innerHTML += createOpportunityCard(op, true);
+                });
+
+                // Update pagination info
+                document.getElementById('current-page').textContent = currentPage;
+                document.getElementById('total-pages').textContent = Math.ceil(profitableOps.length / itemsPerPage);
+
+                // Add pagination event listeners
+                document.getElementById('prev-page').addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderOpportunities();
+                    }
+                });
+
+                document.getElementById('next-page').addEventListener('click', () => {
+                    if (currentPage < Math.ceil(profitableOps.length / itemsPerPage)) {
+                        currentPage++;
+                        renderOpportunities();
+                    }
                 });
             } else {
                 container.innerHTML = `
@@ -672,20 +737,83 @@
                 </svg>
                 <p><strong>No arbitrage opportunities found.</strong> All potential trades would result in losses with current market conditions.</p>
             </div>
+            <div class="pagination-controls" id="opportunity-pagination">
+                <button class="page-button" id="prev-page">Previous</button>
+                <span class="page-info">Page <span id="current-page">1</span> of <span id="total-pages">${Math.ceil(opportunities.length / itemsPerPage)}</span></span>
+                <button class="page-button" id="next-page">Next</button>
+            </div>
             <div class="opportunities-grid" id="opportunities-grid"></div>
         `;
 
-                // Show top 6 opportunities even if they're not profitable
-                const topOps = opportunities.slice(0, 6);
+                // Calculate which items to show on current page
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = Math.min(startIndex + itemsPerPage, opportunities.length);
+                const paginatedItems = opportunities.slice(startIndex, endIndex);
+
                 const grid = document.getElementById('opportunities-grid');
 
-                topOps.forEach(op => {
+                // Show opportunities even if they're not profitable
+                paginatedItems.forEach(op => {
                     grid.innerHTML += createOpportunityCard(op, false);
+                });
+
+                // Update pagination info
+                document.getElementById('current-page').textContent = currentPage;
+                document.getElementById('total-pages').textContent = Math.ceil(opportunities.length / itemsPerPage);
+
+                // Add pagination event listeners
+                document.getElementById('prev-page').addEventListener('click', () => {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderOpportunities();
+                    }
+                });
+
+                document.getElementById('next-page').addEventListener('click', () => {
+                    if (currentPage < Math.ceil(opportunities.length / itemsPerPage)) {
+                        currentPage++;
+                        renderOpportunities();
+                    }
                 });
             }
         }
 
-        function createOpportunityCard(op, isProfitable) {
+        function updateProfitableHistory() {
+            // Get profitable opportunities from current analysis
+            const profitableOps = opportunities.filter(op => op.profit > 0);
+
+            if (profitableOps.length > 0) {
+                // Add to history
+                profitableHistory = [...profitableOps, ...profitableHistory];
+
+                // Limit history to 20 items to prevent excessive growth
+                if (profitableHistory.length > 20) {
+                    profitableHistory = profitableHistory.slice(0, 20);
+                }
+
+                // Update the history display
+                renderProfitableHistory();
+            }
+        }
+
+        function renderProfitableHistory() {
+            const historyContainer = document.getElementById('profitable-history');
+
+            if (profitableHistory.length === 0) {
+                historyContainer.innerHTML = `<div class="no-history">No profitable opportunities found yet</div>`;
+                return;
+            }
+
+            // Clear existing content
+            historyContainer.innerHTML = '';
+
+            // Add each item to history
+            profitableHistory.forEach(op => {
+                historyContainer.innerHTML += createOpportunityCard(op, true, true);
+            });
+        }
+
+        function createOpportunityCard(op, isProfitable, isHistory = false) {
             const profitColor = isProfitable ? 'var(--accent-green)' : 'var(--accent-red)';
             const percentageColor = isProfitable ? 'var(--accent-green)' : 'var(--accent-red)';
             const percentagePrefix = isProfitable ? '+' : '';
@@ -694,8 +822,12 @@
             const profitFormatted = op.profit.toFixed(2);
             const feesFormatted = op.fees.toFixed(2);
 
+            // Format timestamp for history cards
+            const timestamp = isHistory ?
+                `<div class="timestamp">${new Date(op.timestamp).toLocaleString()}</div>` : '';
+
             return `
-        <div class="opportunity-card" data-pair="${op.pair_id}">
+        <div class="opportunity-card ${isProfitable ? 'profitable' : 'not-profitable'}" data-pair="${op.pair_id}">
             <div class="pair-symbol">${op.symbol}</div>
             <div class="profit-percentage" style="color: ${percentageColor};">${percentagePrefix}${percentageFormatted}%</div>
             <div class="opportunity-header">
@@ -718,21 +850,20 @@
                 <span class="price-value">$${feesFormatted}</span>
             </div>
             <div class="profit-row">
-                <span>${isProfitable ? 'Potential Profit' : 'Result'}:</span>
+                <span>${isProfitable ? 'Profit' : 'Result'}:</span>
                 <span style="color: ${profitColor}">$${profitFormatted}</span>
             </div>
+            ${timestamp}
         </div>
     `;
         }
 
         function updateStats() {
             const profitableOps = opportunities.filter(op => op.profit > 0);
-            const maxProfit = profitableOps.length > 0 ?
-                Math.max(...profitableOps.map(op => op.profit)) : 0;
+            const totalProfit = profitableOps.reduce((sum, op) => sum + op.profit, 0);
 
             document.getElementById('active-pairs').textContent = allTradingPairs.length * 2; // Each pair has two directions
-            document.getElementById('profitable-ops').textContent = profitableOps.length;
-            document.getElementById('max-profit').textContent = `$${maxProfit.toFixed(2)}`;
+            document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
         }
 
         function startAutoRefresh() {
