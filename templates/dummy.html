@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crypto Arbitrage Finder</title>
     <style>
         :root {
             --bg-dark: #0f1216;
@@ -37,25 +36,39 @@
             margin: 0 auto;
         }
 
-        /* Top section with controls and stats side by side */
-        .top-section {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
+        header {
             margin-bottom: 30px;
+            background: var(--primary-gradient);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2.25rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        h1 svg {
+            color: var(--accent-green);
         }
 
         .controls {
             background: var(--bg-card);
             border-radius: 12px;
             padding: 25px;
+            margin-bottom: 30px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
-            flex: 1;
-        }
-
-        .stats {
-            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 20px;
+            align-items: flex-end;
         }
 
         .form-group {
@@ -89,16 +102,57 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
         }
 
+        button {
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background-color: var(--accent-blue);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            height: 48px;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        .symbol-pill {
+            background: var(--bg-input);
+            border-radius: 20px;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .symbol-pill.active {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid var(--accent-blue);
+            color: var(--accent-blue);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
         .stat-card {
             background: var(--bg-card);
             border-radius: 12px;
+            padding: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
             text-align: center;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
         }
 
         .stat-value {
@@ -122,7 +176,95 @@
             color: var(--accent-red);
         }
 
-        /* Analysis Status */
+        .opportunities-header {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .nowrap {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .last-updated {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-align: center;
+            display: block;
+            /* ensures it behaves like a block element */
+            width: 100%;
+            margin: 0 auto;
+        }
+
+
+        .opportunities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .opportunity-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--card-border);
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .opportunity-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .opportunity-card.profitable {
+            border-left: 4px solid var(--accent-green);
+        }
+
+        .price-value {
+            font-weight: 600;
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .alert-message {
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .opportunity-card {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Analysis status section */
         #analysis-status-container {
             background: var(--bg-card);
             border-radius: 12px;
@@ -164,54 +306,19 @@
             border: 1px solid var(--border-color);
         }
 
-        .opportunities-header {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+        @media (max-width: 768px) {
+            .controls {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
 
-        .nowrap {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
+            .stats {
+                grid-template-columns: 1fr;
+            }
 
-        .last-updated {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-align: center;
-            display: block;
-            width: 100%;
-            margin: 0 auto;
-        }
-
-        .opportunities-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .opportunity-card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            border: 1px solid var(--card-border);
-            position: relative;
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .opportunity-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .opportunity-card.profitable {
-            border-left: 4px solid var(--accent-green);
+            .opportunities-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .pair-symbol {
@@ -244,7 +351,6 @@
 
         .price-value {
             font-weight: 600;
-            font-family: 'Roboto Mono', monospace;
         }
 
         .difference-row {
@@ -269,26 +375,10 @@
             border-top: 1px solid var(--border-color);
         }
 
-        .no-opportunities {
-            text-align: center;
-            padding: 40px;
-            color: var(--text-secondary);
-        }
-
-        .alert-message {
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--accent-green);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
 
         .error-message {
@@ -300,6 +390,12 @@
             display: flex;
             align-items: center;
             gap: 10px;
+        }
+
+        .no-opportunities {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
         }
 
         .pagination-controls {
@@ -327,47 +423,30 @@
         .page-info {
             color: var(--text-secondary);
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* Responsive adjustments */
-        @media (max-width: 768px) {
-            .top-section {
-                flex-direction: column;
-            }
-
-            .opportunities-grid {
-                grid-template-columns: 1fr;
-            }
-        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <div class="top-section">
-            <div class="controls">
-                <div class="form-group">
-                    <label for="amount">Trade Amount (USD):</label>
-                    <input type="number" id="amount" value="50000" placeholder="Enter trade amount">
-                </div>
+        <div class="controls">
+            <div class="form-group">
+                <label for="amount">Trade Amount (USD):</label>
+                <input type="number" id="amount" value="50000" placeholder="Enter trade amount">
             </div>
+            <!-- <button id="analyze-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                Analyze All Pairs
+            </button> -->
+        </div>
 
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-label">Total Profitable Opportunities</div>
-                    <div class="stat-value positive" id="total-profit">$0.00</div>
-                </div>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Profitable Opportunities</div>
+                <div class="stat-value positive" id="total-profit">$0.00</div>
             </div>
         </div>
 
@@ -411,7 +490,11 @@
         // List of all trading pairs from your FastAPI endpoints
         const allTradingPairs = [
             "binance-bitget", "bybit-coinex", "bybit-crypto", "bybit-htx",
-            "coinex-bitget", "bitget-htx"
+            "coinex-bitget", "bitget-htx", //"coinbase-crypto",
+            // "binance-bitmex", "binance-bybit", "binance-coinbase", "binance-coinex","binance-crypto", "binance-htx", "binance-kucoin",
+            // "bitget-crypto", "bybit-bitget", "bybit-coinbase", "coinex-bitmex", "coinex-crypto", "coinex-htx", "coinex-kucoin", "kucoin-bitget",
+            // "bybit-kucoin", "coinbase-bitget", "coinbase-bitmex", "coinbase-coinex",  "coinbase-htx", "coinbase-kucoin"
+            // "kucoin-crypto", "kucoin-htx", "bitget-bitmex",
         ];
 
         // List of all symbols to trade automatically
@@ -419,7 +502,7 @@
             "BTC/USDT", "ETH/USDT", "BNB/USDT", "SOL/USDT", "XRP/USDT", "ADA/USDT", "DOGE/USDT", "DOT/USDT",
             "AVAX/USDT", "TRX/USDT", "SHIB/USDT", "LTC/USDT", "LINK/USDT", "BCH/USDT",
             "ATOM/USDT", "XLM/USDT", "NEAR/USDT", "APT/USDT", "ARB/USDT", "OP/USDT", "ETC/USDT", "HBAR/USDT",
-            "FIL/USDT", "INJ/USDT", "IMX/USDT", "SUI/USDT", "PEPE/USDT", "TIA/USDT",
+            "FIL/USDT", "INJ/USDT", "IMX/USDT", "SUI/USDT", "PEPE/USDT", "RNDR/USDT", "TIA/USDT",
             "FLOW/USDT", "GRT/USDT", "LDO/USDT", "EGLD/USDT", "KAVA/USDT", "CRV/USDT", "1INCH/USDT", "ALGO/USDT", "SAND/USDT", "MANA/USDT", "CHZ/USDT", "AAVE/USDT",
             "UNI/USDT", "DYDX/USDT", "COMP/USDT", "RUNE/USDT", "ZIL/USDT", "XMR/USDT"
         ];
@@ -680,28 +763,22 @@
             timer = setInterval(analyzeAllPairs, 60000);
         }
 
-        // Add pagination event listeners
+        function initActiveSymbols() {
+            // This function is empty as we removed the symbols display
+            // Keeping it for compatibility with potential future changes
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
-            // Set up pagination
-            document.getElementById('prev-page').addEventListener('click', function () {
-                if (currentPage > 1) {
-                    currentPage--;
-                    renderOpportunities();
-                }
-            });
-
-            document.getElementById('next-page').addEventListener('click', function () {
-                if (currentPage < totalPages) {
-                    currentPage++;
-                    renderOpportunities();
-                }
-            });
-
             // Initial analysis
             analyzeAllPairs();
 
             // Start auto-refresh
             startAutoRefresh();
+
+            document.getElementById('analyze-btn').addEventListener('click', function () {
+                analyzeAllPairs();
+                startAutoRefresh(); // Reset the timer
+            });
         });
     </script>
 </body>
