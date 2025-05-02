@@ -509,14 +509,12 @@
     <script>
         // List of all trading pairs from your FastAPI endpoints
         const allTradingPairs = [
-            "binance-bitget", "binance-bitmex", "binance-bybit", "binance-coinbase", "binance-coinex",
-            "binance-crypto", "binance-htx", "binance-kucoin", "bitget-bitmex", "bitget-crypto",
-            "bitget-htx", "bybit-bitget", "bybit-coinbase", "bybit-coinex", "bybit-crypto",
-            "bybit-htx", "bybit-kucoin", "coinbase-bitget", "coinbase-bitmex", "coinbase-coinex",
-            "coinbase-crypto", "coinbase-htx", "coinbase-kucoin", "coinex-bitget",
-            "coinex-bitmex", "coinex-crypto", "coinex-htx", "coinex-kucoin", "kucoin-bitget",
-            "kucoin-crypto", "kucoin-htx"
+            "binance-bitget", "bybit-coinex", "bybit-crypto","bybit-htx", "coinbase-crypto", "coinex-bitget", "bitget-htx"
         ];
+        // "binance-bitmex", "binance-bybit", "binance-coinbase", "binance-coinex","binance-crypto", "binance-htx", "binance-kucoin",
+        // "bitget-crypto", "bybit-bitget", "bybit-coinbase", "coinex-bitmex", "coinex-crypto", "coinex-htx", "coinex-kucoin", "kucoin-bitget",
+        // "bybit-kucoin", "coinbase-bitget", "coinbase-bitmex", "coinbase-coinex",  "coinbase-htx", "coinbase-kucoin"
+        // "kucoin-crypto", "kucoin-htx", "bitget-bitmex",
 
         // API base URL - change this to your FastAPI server URL
         const API_BASE_URL = 'http://localhost:8000';
@@ -608,7 +606,7 @@
             document.getElementById('opportunities-container').innerHTML = `
         <div class="loading" id="loading-spinner">
             <div class="spinner"></div>
-            <p>Analyzing ${allTradingPairs.length * 2} exchange pairs for ${symbol}...</p>
+            <p>Analyzing exchange pairs for ${symbol}...</p>
         </div>
     `;
 

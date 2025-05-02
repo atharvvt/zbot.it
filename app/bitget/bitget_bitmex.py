@@ -70,8 +70,8 @@ def simulate_arbitrage(buy_price, sell_price, buy_fee, sell_fee, trade_amount_us
         "to_exchange": to_exchange,
         "buy_price": round(buy_price, 2),
         "sell_price": round(sell_price, 2),
-        "currency_bought": round(btc_bought, 6),
-        "currency_after_network_fee": round(btc_to_sell, 6),
+        "currency_bought": round(btc_bought, 2),
+        "currency_after_network_fee": round(btc_to_sell, 2),
         "usd_gained": round(usd_gained, 2),
         "buy_fee_usd": round(buy_fee_usd, 2),
         "sell_fee_usd": round(sell_fee_usd, 2),
@@ -81,7 +81,7 @@ def simulate_arbitrage(buy_price, sell_price, buy_fee, sell_fee, trade_amount_us
 
     # print(f"\n🧮 {from_exchange} → {to_exchange}")
     # print(f"Buy @ ${buy_price:.2f}, Sell @ ${sell_price:.2f}")
-    # print(f"currency Bought: {btc_bought:.6f}, After Network Fee: {btc_to_sell:.6f}")
+    # print(f"currency Bought: {btc_bought:.2f}, After Network Fee: {btc_to_sell:.2f}")
     # print(f"USD Gained: ${usd_gained:.2f}")
     # print(f"Fees: Buy=${buy_fee_usd:.2f}, Sell=${sell_fee_usd:.2f}, Tax=${tax:.2f}")
     # print(f"💰 Profit: ${profit:.2f}")
