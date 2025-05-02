@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi import FastAPI, Request, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response, JSONResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 import uvicorn
@@ -34,6 +34,16 @@ class ArbitrageRequest(BaseModel):
     trade_amount_usd: float = 50000
 
 templates = Jinja2Templates(directory="templates")
+
+
+@app.get("/health", include_in_schema=False)
+def health_check():
+    return JSONResponse(status_code=200, content={"status": "ok"})
+
+@app.head("/", include_in_schema=False)
+def head_home():
+    return Response(status_code=200)
+
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request):
