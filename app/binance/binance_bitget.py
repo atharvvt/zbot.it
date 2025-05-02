@@ -123,7 +123,7 @@ def check_arbitrage_opportunity(symbol, trade_amount_usd):
             from_exchange="Bitget",
             to_exchange="Binance"
         ))
-    
+
     return result
 
 def run_arbitrage(symbol = 'BTC/USDT', trade_amount_usd = 50000):
