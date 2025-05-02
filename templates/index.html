@@ -531,9 +531,12 @@
         let historyCurrentPage = 1;
         let historyTotalPages = 1;
 
+        // Batch processing settings
+        const BATCH_SIZE = 6; // Process 6 exchange pairs at a time
         let timer;
         let opportunities = [];
         let profitableHistory = [];
+        let isAnalyzing = false;
 
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
@@ -596,32 +599,82 @@
             }
         }
 
+        // Process a batch of trading pairs
+        async function processBatch(batchPairs, symbol, amount, progressCallback) {
+            try {
+                // Fetch data for this batch of pairs simultaneously
+                const promises = batchPairs.map(pair => fetchArbitrageData(pair, symbol, amount));
+                const results = await Promise.all(promises);
+
+                // Filter out nulls and flatten the results
+                return results.filter(result => result !== null).flat();
+            } catch (error) {
+                console.error('Error processing batch:', error);
+                return [];
+            }
+        }
+
+        // Main function to analyze all pairs in batches
         async function analyzeAllPairs() {
+            // Prevent multiple simultaneous analyses
+            if (isAnalyzing) {
+                console.log('Analysis already in progress, please wait...');
+                return;
+            }
+
+            isAnalyzing = true;
             const symbol = document.getElementById('symbol').value;
             const amount = parseFloat(document.getElementById('amount').value);
 
             if (!symbol || isNaN(amount) || amount <= 0) {
                 alert('Please enter a valid symbol and amount');
+                isAnalyzing = false;
                 return;
             }
 
+            // Clear existing opportunities to prevent outdated data display
+            opportunities = [];
+
+            // Initialize progress message
             document.getElementById('opportunities-container').innerHTML = `
         <div class="loading" id="loading-spinner">
             <div class="spinner"></div>
-            <p>Analyzing ${allTradingPairs.length * 2} exchange pairs for ${symbol}...</p>
+            <p>Starting analysis for ${symbol} across ${allTradingPairs.length} exchange pairs...</p>
         </div>
     `;
 
             try {
-                // Fetch data for all pairs simultaneously
-                const promises = allTradingPairs.map(pair => fetchArbitrageData(pair, symbol, amount));
-                const results = await Promise.all(promises);
+                // Divide all trading pairs into batches
+                const totalPairs = allTradingPairs.length;
+                let processedPairs = 0;
+                let allResults = [];
 
-                // Flatten the results and filter out nulls
-                opportunities = results
-                    .filter(result => result !== null)
-                    .flat()
-                    .sort((a, b) => b.profit - a.profit);
+                // Process each batch sequentially
+                for (let i = 0; i < totalPairs; i += BATCH_SIZE) {
+                    // Get current batch
+                    const batch = allTradingPairs.slice(i, i + BATCH_SIZE);
+                    processedPairs += batch.length;
+
+                    // Update progress message
+                    const progressSpinner = document.getElementById('loading-spinner');
+                    if (progressSpinner) {
+                        progressSpinner.innerHTML = `
+                    <div class="spinner"></div>
+                    <p>Processing batch ${Math.ceil(processedPairs / BATCH_SIZE)} of ${Math.ceil(totalPairs / BATCH_SIZE)}...</p>
+                    <p>Analyzed ${processedPairs} of ${totalPairs} exchange pairs (${Math.round(processedPairs / totalPairs * 100)}%)</p>
+                `;
+                    }
+
+                    // Process current batch
+                    const batchResults = await processBatch(batch, symbol, amount);
+                    allResults = [...allResults, ...batchResults];
+
+                    // Small delay between batches to reduce server load
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+
+                // Sort all results by profit
+                opportunities = allResults.sort((a, b) => b.profit - a.profit);
 
                 // Reset to first page when new data is loaded
                 currentPage = 1;
@@ -646,6 +699,8 @@
                 <p>Error fetching data: ${error.message}. Make sure your FastAPI server is running at ${API_BASE_URL}</p>
             </div>
         `;
+            } finally {
+                isAnalyzing = false;
             }
         }
 
@@ -861,9 +916,11 @@
         function updateStats() {
             const profitableOps = opportunities.filter(op => op.profit > 0);
             const totalProfit = profitableOps.reduce((sum, op) => sum + op.profit, 0);
+            const historicalProfit = profitableHistory.reduce((sum, op) => sum + op.profit, 0);
 
             document.getElementById('active-pairs').textContent = allTradingPairs.length * 2; // Each pair has two directions
             document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
+            document.getElementById('historical-profit').textContent = `$${historicalProfit.toFixed(2)}`;
         }
 
         function startAutoRefresh() {
@@ -872,8 +929,8 @@
                 clearInterval(timer);
             }
 
-            // Set new timer to refresh every 30 seconds
-            timer = setInterval(analyzeAllPairs, 30000);
+            // Set new timer to refresh every 60 seconds (increased from 30 to reduce load)
+            timer = setInterval(analyzeAllPairs, 60000);
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -885,8 +942,12 @@
 
             // Button click handler
             document.getElementById('analyze-btn').addEventListener('click', function () {
-                analyzeAllPairs();
-                startAutoRefresh(); // Reset the timer
+                if (!isAnalyzing) {
+                    analyzeAllPairs();
+                    startAutoRefresh(); // Reset the timer
+                } else {
+                    alert('Analysis already in progress, please wait for it to complete.');
+                }
             });
         });
     </script>
