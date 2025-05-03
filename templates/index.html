@@ -389,29 +389,6 @@
                     <input type="number" id="amount" value="50000" placeholder="Enter trade amount">
                 </div>
             </div>
-
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-label">Total Profitable Opportunities</div>
-                    <div class="stat-value positive" id="total-profit">$0.00</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Analysis Status Section -->
-        <div id="analysis-status-container">
-            <table class="chain-table">
-                <thead>
-                    <tr>
-                        <th>Symbol</th>
-                        <th>Price</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="chain-status-body">
-                    <!-- Dynamic content will be inserted here -->
-                </tbody>
-            </table>
         </div>
 
         <!-- Opportunities Section -->
@@ -505,11 +482,6 @@
                     throw new Error(`Invalid data structure received for ${pair}`);
                 }
 
-                // Store the buy price in symbolPriceMap for updating the chain table
-                if (data.result[0].buy_price) {
-                    symbolPriceMap[symbol] = data.result[0].buy_price;
-                }
-
                 // Process both directions (from-to and to-from)
                 return data.result.map((direction, index) => {
                     const [fromExchange, toExchange] = index === 0 ?
@@ -545,39 +517,6 @@
             }
         }
 
-        // Function to populate the chain status table with dynamic symbol data
-        function populateChainStatus() {
-            const tableBody = document.getElementById('chain-status-body');
-            tableBody.innerHTML = '';
-
-            // Sort symbols to make display consistent
-            const displaySymbols = Object.keys(symbolPriceMap).sort();
-
-            // Display symbols with their prices
-            displaySymbols.forEach(symbol => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-            <td>${symbol}</td>
-            <td>$${symbolPriceMap[symbol].toFixed(6)}</td>
-            <td><span class="online-badge">Online</span></td>
-        `;
-                tableBody.appendChild(row);
-            });
-
-            // If we don't have any data yet, show some loading placeholders
-            if (displaySymbols.length === 0) {
-                for (let i = 0; i < 5; i++) {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                <td>Loading...</td>
-                <td>$0.000000</td>
-                <td><span class="online-badge">Online</span></td>
-            `;
-                    tableBody.appendChild(row);
-                }
-            }
-        }
-
         async function analyzeSymbol(symbol) {
             const amount = parseFloat(document.getElementById('amount').value);
 
@@ -591,8 +530,6 @@
                 const promises = allTradingPairs.map(pair => fetchArbitrageData(pair, symbol, amount));
                 const results = await Promise.all(promises);
 
-                // Update chain status table with latest price data
-                populateChainStatus();
 
                 // Flatten the results and filter out nulls
                 allOpportunities = results
@@ -744,7 +681,6 @@
 
         function updateStats() {
             const totalProfit = savedOpportunities.reduce((sum, op) => sum + op.profit, 0);
-            document.getElementById('total-profit').textContent = `$${totalProfit.toFixed(2)}`;
         }
 
         function startAutoRefresh() {
@@ -759,8 +695,6 @@
 
         // Initialization when the document is ready
         document.addEventListener('DOMContentLoaded', function () {
-            // Populate chain status table
-            populateChainStatus();
 
             // Set up pagination
             document.getElementById('prev-page').addEventListener('click', function () {
