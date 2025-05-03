@@ -126,32 +126,45 @@
         #analysis-status-container {
             background: var(--bg-card);
             border-radius: 12px;
-            padding: 15px;
             margin-bottom: 20px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             border: 1px solid var(--border-color);
+            overflow: hidden;
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            transition: opacity 0.3s ease;
+        .chain-table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(59, 130, 246, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--accent-blue);
-            animation: spin 1s ease-in-out infinite;
-            margin: 0 auto 20px;
+        .chain-table th,
+        .chain-table td {
+            padding: 15px 20px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        .chain-table th {
+            background-color: #1f2937;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .chain-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .online-badge {
+            background-color: var(--accent-green);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: inline-block;
         }
 
         /* Opportunities section */
@@ -350,6 +363,20 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        #analysis-status-container {
+            max-height: 300px;
+            /* Adjust height as needed */
+            overflow-y: auto;
+            border-radius: 8px;
+        }
+
+        /* Optional: Sticky table headers */
+        .chain-table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
     </style>
 </head>
 
@@ -373,10 +400,18 @@
 
         <!-- Analysis Status Section -->
         <div id="analysis-status-container">
-            <div class="loading" id="loading-indicator">
-                <div class="spinner"></div>
-                <p id="loading-message">Analyzing all exchange pairs...</p>
-            </div>
+            <table class="chain-table">
+                <thead>
+                    <tr>
+                        <th>Symbol</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="chain-status-body">
+                    <!-- Dynamic content will be inserted here -->
+                </tbody>
+            </table>
         </div>
 
         <!-- Opportunities Section -->
@@ -421,7 +456,7 @@
             "ATOM/USDT", "XLM/USDT", "NEAR/USDT", "APT/USDT", "ARB/USDT", "OP/USDT", "ETC/USDT", "HBAR/USDT",
             "FIL/USDT", "INJ/USDT", "IMX/USDT", "SUI/USDT", "PEPE/USDT", "TIA/USDT",
             "FLOW/USDT", "GRT/USDT", "LDO/USDT", "EGLD/USDT", "KAVA/USDT", "CRV/USDT", "1INCH/USDT", "ALGO/USDT", "SAND/USDT", "MANA/USDT", "CHZ/USDT", "AAVE/USDT",
-            "UNI/USDT", "DYDX/USDT", "COMP/USDT", "RUNE/USDT", "ZIL/USDT", "XMR/USDT"
+            "UNI/USDT", "DYDX/USDT", "COMP/USDT", "RUNE/USDT", "ZIL/USDT"
         ];
 
         // API base URL - change this to your FastAPI server URL
@@ -439,6 +474,7 @@
         let savedOpportunities = [];
         let currentSymbolIndex = 0;
         let isAnalyzing = false;
+        let symbolPriceMap = {}; // To store buy prices by symbol for chain status table
 
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
@@ -469,11 +505,19 @@
                     throw new Error(`Invalid data structure received for ${pair}`);
                 }
 
+                // Store the buy price in symbolPriceMap for updating the chain table
+                if (data.result[0].buy_price) {
+                    symbolPriceMap[symbol] = data.result[0].buy_price;
+                }
+
                 // Process both directions (from-to and to-from)
                 return data.result.map((direction, index) => {
                     const [fromExchange, toExchange] = index === 0 ?
                         pair.split('-') :
                         pair.split('-').reverse();
+
+                    const tokensBought = direction.currency_bought || (amount / direction.buy_price);
+                    const tokensAfterFees = direction.currency_after_network_fee || tokensBought;
 
                     return {
                         from_exchange: capitalizeFirstLetter(fromExchange),
@@ -481,8 +525,8 @@
                         symbol: symbol,
                         buy_price: direction.buy_price,
                         sell_price: direction.sell_price,
-                        currency_bought: direction.currency_bought,
-                        currency_after_network_fee: direction.currency_after_network_fee,
+                        currency_bought: tokensBought,
+                        currency_after_network_fee: tokensAfterFees,
                         buy_fee_usd: direction.buy_fee_usd,
                         sell_fee_usd: direction.sell_fee_usd,
                         usd_gained: direction.usd_gained,
@@ -501,6 +545,39 @@
             }
         }
 
+        // Function to populate the chain status table with dynamic symbol data
+        function populateChainStatus() {
+            const tableBody = document.getElementById('chain-status-body');
+            tableBody.innerHTML = '';
+
+            // Sort symbols to make display consistent
+            const displaySymbols = Object.keys(symbolPriceMap).sort();
+
+            // Display symbols with their prices
+            displaySymbols.forEach(symbol => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+            <td>${symbol}</td>
+            <td>$${symbolPriceMap[symbol].toFixed(6)}</td>
+            <td><span class="online-badge">Online</span></td>
+        `;
+                tableBody.appendChild(row);
+            });
+
+            // If we don't have any data yet, show some loading placeholders
+            if (displaySymbols.length === 0) {
+                for (let i = 0; i < 5; i++) {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                <td>Loading...</td>
+                <td>$0.000000</td>
+                <td><span class="online-badge">Online</span></td>
+            `;
+                    tableBody.appendChild(row);
+                }
+            }
+        }
+
         async function analyzeSymbol(symbol) {
             const amount = parseFloat(document.getElementById('amount').value);
 
@@ -509,14 +586,13 @@
                 return;
             }
 
-            // Show loading indicator
-            document.getElementById('loading-indicator').style.display = 'block';
-            document.getElementById('loading-message').textContent = `Analyzing ${symbol} across exchanges, hang tight...`;
-
             try {
                 // Fetch data for all pairs simultaneously
                 const promises = allTradingPairs.map(pair => fetchArbitrageData(pair, symbol, amount));
                 const results = await Promise.all(promises);
+
+                // Update chain status table with latest price data
+                populateChainStatus();
 
                 // Flatten the results and filter out nulls
                 allOpportunities = results
@@ -572,9 +648,6 @@
             </div>
         `;
                 document.getElementById('opportunities-alert').style.display = 'block';
-            } finally {
-                // Hide loading indicator
-                document.getElementById('loading-indicator').style.display = 'none';
             }
         }
 
@@ -646,6 +719,10 @@
                 <span class="price-value">$${op.buy_price.toFixed(2)}</span>
             </div>
             <div class="price-row">
+                <span class="price-label">Tokens Bought:</span>
+                <span class="price-value">${op.currency_bought} ${op.symbol}</span>
+            </div>
+            <div class="price-row">
                 <span class="price-label">Sell Price:</span>
                 <span class="price-value">$${op.sell_price.toFixed(2)}</span>
             </div>
@@ -680,8 +757,11 @@
             timer = setInterval(analyzeAllPairs, 60000);
         }
 
-        // Add pagination event listeners
+        // Initialization when the document is ready
         document.addEventListener('DOMContentLoaded', function () {
+            // Populate chain status table
+            populateChainStatus();
+
             // Set up pagination
             document.getElementById('prev-page').addEventListener('click', function () {
                 if (currentPage > 1) {
